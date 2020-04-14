@@ -1,38 +1,66 @@
-import { EventEmitter, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
+import { Subject } from 'rxjs/Subject';
 import { Recipe } from './recipe.model';
 import { Ingredient } from '../shared/ingredient.model';
 import { ShoppingListService } from '../shopping-list/shopping-list.service';
 
 @Injectable()
 export class RecipeService {
-   recipeSelected = new EventEmitter<Recipe>();
+  //passes an array of recipes as a value
+  recipesChanged = new Subject<Recipe[]>();
 
-   private recipes: Recipe[] = [
-      new Recipe(
-         'Tasty Schnitzel',
-         'A super-tasty Schnitzel - just awesome!',
-         'https://upload.wikimedia.org/wikipedia/commons/7/72/Schnitzel.JPG',
-         [
-            new Ingredient('meat', 1),
-            new Ingredient('french fries', 20)
-         ]),
-      new Recipe(
-         'Big Fat Burger',
-         'What else do you need?',
-         'https://upload.wikimedia.org/wikipedia/commons/b/be/Burger_King_Angus_Bacon_%26_Cheese_Steak_Burger.jpg',
-         [
-            new Ingredient('bread', 2),
-            new Ingredient('meat', 1)
-         ])
-   ];
+    private recipes: Recipe[] = [
+        new Recipe(
+            'Tasty Schnitzel',
+            'A super tasty Schnitzel - Just awesome',
+            'https://www.daringgourmet.com/wp-content/uploads/2014/03/Schnitzel-7_edited.jpg',
+            [
+                new Ingredient('Chicken', 1),
+                new Ingredient('French Fries', 20)
+            ]),
+        new Recipe(
+            'Big Fat Burger',
+            'What else do you need to say?',
+            'https://www.seriouseats.com/recipes/images/2017/06/20170617-bulgogi-burger-matt-clifton-1-1500x1125.jpg',
+        [
+            new Ingredient('Buns', 2),
+            new Ingredient('Meat', 1)
+        ])
+    ];
 
-   constructor(private slService: ShoppingListService) {}
+    constructor(private slService: ShoppingListService) {}
 
-   getRecipes() {
-      return this.recipes.slice();
-   }
+    setRecipes(recipes: Recipe[]) {
+      this.recipes = recipes;
+      this.recipesChanged.next(this.recipes.slice());
+    }
 
-   addIngredientsToSL(ingredients: Ingredient[]) {
-      this.slService.addIngredients(ingredients);
-   }
+    getRecipes() {
+        return this.recipes.slice();
+    }
+
+    getRecipe(index: number) {
+        return this.recipes[index];
+    }
+
+    addIngredientsToShoppingList(ingredients: Ingredient[]) {
+        this.slService.addIngredients(ingredients);
+    }
+
+    addRecipe(recipe: Recipe) {
+      this.recipes.push(recipe);
+      this.recipesChanged.next(this.recipes.slice());
+    }
+
+    updateRecipe(index: number, newRecipe: Recipe) {
+
+      this.recipes[index] = newRecipe;
+      this.recipesChanged.next(this.recipes.slice());
+    }
+
+    deleteRecipe(index: number) {
+      this.recipes.splice(index, 1);
+      this.recipesChanged.next(this.recipes.slice());
+    }
+
 }
